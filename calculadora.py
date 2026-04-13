@@ -5,6 +5,7 @@ contador_simbolos = 0
 string = ""
 contador = 1
 
+#cambio para el pull
 
 class Calculadora:
     def __init__(self):
