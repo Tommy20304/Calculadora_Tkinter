@@ -1,93 +1,124 @@
 import tkinter as tk
 
 lista = []
-lista_simbolos = ['🆑', "+", "-", "x", "/", "="]
-lista_calculadora = []
 contador_simbolos = 0
 string = ""
 contador = 1
 
 
-def ingresar_numeros(c):
-    global string
-    lista_calculadora.append(c)
-    if lista_calculadora[0] != "-":
-        if lista_calculadora[(len(lista_calculadora) - 1)] in lista_simbolos and lista_calculadora[(len(lista_calculadora) - 2)] in lista_simbolos:
-            del lista_calculadora[(len(lista_calculadora) - 2)]
+class Calculadora:
+    def __init__(self):
+        self.lista_calculadora = []
+        self.string = ""
+        self.lista_simbolos = ['🆑', "+", "-", "x", "/", "="]
+    
+    #si el ingreso de numeros o simbolos es incorrecto, hace operaciones para corregirlo
+    def determinar_errores_de_signos(self):
         
-    contenido = "".join(lista_calculadora)
-    variable.set(contenido)
-    string = contenido
-    
-def eliminar(cadena):
-    global string
-    nueva_cadena = cadena[:(len(cadena) - 1)]
-    string = nueva_cadena
-    del lista_calculadora[(len(lista_calculadora)) - 1]
-    variable.set(nueva_cadena)
-    
-def realizar_operacion(contenido):
-    global lista_calculadora
-    global string
-    var1 = ""
-    var2 = ""
-    simbolo_guardar = ""
-    punto_de_partida = 0
-    for i in range(len(contenido)):
-        if i == 0 and contenido[i] == "-":
-            var1 = var1 + contenido[i]
-            continue
-        if contenido[i] in lista_simbolos:
-            punto_de_partida = i + 1
-            simbolo_guardar = contenido[i]
-            break
-        var1 = var1 + contenido[i]
-        
-    
-    if punto_de_partida == 0 or simbolo_guardar == contenido[(len(contenido) - 1)]:
-        return ""
-        
-    for i in range(punto_de_partida, len(contenido)):
-        
-        if contenido[i] not in lista_simbolos:
-           var2 = var2 + contenido[i]
-           
-        if i == (len(contenido) - 1) or contenido[i] in lista_simbolos:
-            if simbolo_guardar == "+":
-                var1 = int(var1) + int(var2)
-                var2 = ""
-                
-            elif simbolo_guardar == "-":
-                var1 = int(var1) - int(var2)
-                var2 = ""
-                
-            elif simbolo_guardar == "x":
-                var1 = int(var1) * int(var2)
-                var2 = ""
-            
-            elif simbolo_guardar == "/":
-                var1 = float(var1) / float(var2)
-                var2 = ""
-                
-            simbolo_guardar = contenido[i]
-    
-    variable.set(str(var1))
-    lista_calculadora = [str(var1)]
-    string = ""
-    
-    
-    
-def comprobacion(simbolo):
-    if simbolo != '🆑' and simbolo != "=":
-        if lista_calculadora != [] or simbolo == '-':
-            ingresar_numeros(simbolo)
-        
-    if lista_calculadora != [] :
-        if simbolo == "=":
-            realizar_operacion(string)
-        elif simbolo == "🆑":
-            eliminar(string)
+        #se comprueba que el primer numero ingresado no sea un simbolo, a excepcion del simbolo de resta
+        if not self.lista_calculadora[0].isdigit() and self.lista_calculadora[0] != "-":
+            del self.lista_calculadora[0]
+            return ""
 
+        #se comprueba que si se ingresa un simbolo despues de ingresar otro simbolo, se elimine el simbolo anterior y se reemplace por el nuevo
+        if len(self.lista_calculadora) > 1:
+            
+            #si el simbolo de resta es el primer digito ingresado, se quita el simbolo nuevo
+            if self.lista_calculadora[-2] == "-" and self.lista_calculadora[-1] in self.lista_simbolos and len(self.lista_calculadora) == 2:
+                del self.lista_calculadora[-1]
+                return ""
+            
+            if self.lista_calculadora[-1] in self.lista_simbolos and self.lista_calculadora[-2] in self.lista_simbolos:
+                del self.lista_calculadora[-2]
+                return ""
+        
+    def ingresar_numeros(self,c):
+        self.lista_calculadora.append(c)
+        
+        #se comprueba los signos que se ingresaron
+        self.determinar_errores_de_signos()
+            
+        contenido = "".join(self.lista_calculadora)
+        variable.set(contenido)
+        self.string = contenido
+        
+    def eliminar(self,cadena):
+        nueva_cadena = cadena[:(len(cadena) - 1)] #se elimina el ultimo caracter de la cadena
+        self.string = nueva_cadena
+        del self.lista_calculadora[(len(self.lista_calculadora)) - 1]
+        variable.set(nueva_cadena)
+        
+    #se realiza la operacion dependiendo del simbolo que se ingrese
+    def realizar_operacion(self, contenido):
+        num1 = ""
+        num2 = ""
+        simbolo_guardar = ""
+        punto_de_partida = 0
+        for i in range(len(contenido)):
+            
+            #si el signo resta esta al inicio, se junta en el var1
+            if i == 0 and contenido[i] == "-":
+                num1 = num1 + contenido[i]
+                continue
+            
+            #cuando se rastre un simbolo, se guarda el simbolo y se marca el punto de partida para el var2
+            if contenido[i] in self.lista_simbolos:
+                punto_de_partida = i + 1
+                simbolo_guardar = contenido[i]
+                break
+            
+            num1 = num1 + contenido[i]
+            
+        
+        if punto_de_partida == 0 or simbolo_guardar == contenido[-1]:
+            return ""
+            
+        #se recorre el contenido a partir del punto de partida para juntar el var2
+        for i in range(punto_de_partida, len(contenido)):
+            
+            if contenido[i] not in self.lista_simbolos:
+                num2 = num2 + contenido[i]
+            
+            #si es el ultimo digito o se encontro un simbolo, se hace esto
+            if i == (len(contenido) - 1) or contenido[i] in self.lista_simbolos:
+                if simbolo_guardar == "+":
+                    num1 = int(num1) + int(num2)
+                    num2 = ""
+                    
+                elif simbolo_guardar == "-":
+                    num1 = int(num1) - int(num2)
+                    num2 = ""
+                    
+                elif simbolo_guardar == "x":
+                    num1 = int(num1) * int(num2)
+                    numr2 = ""
+                
+                elif simbolo_guardar == "/":
+                    num1 = float(num1) / float(num2)
+                    num2 = ""
+                    
+                simbolo_guardar = contenido[i]
+        
+        variable.set(str(num1))
+        self.lista_calculadora = [str(num1)]
+        self.string = ""
+        
+        
+    #comprueba que los simbolos se ingresen en el momento correcto
+    def comprobacion(self, simbolo):
+        if simbolo != '🆑' and simbolo != "=":
+            if self.lista_calculadora != [] or simbolo == '-':
+                self.ingresar_numeros(simbolo)
+            
+        if self.lista_calculadora != [] :
+            if simbolo == "=":
+                self.realizar_operacion(self.string)
+            elif simbolo == "🆑":
+                self.eliminar(self.string)
+
+cal = Calculadora()
+
+#area de configuracion de la ventana y botones
 app = tk.Tk()
 app.configure(background = "black")
 app.title("Calculadora")
@@ -113,16 +144,16 @@ for i in range(3):
 for i in lista:    
     for e in range(3):
         tk.Button(i, text = f"{contador}", bg = "#736E6E", relief = tk.FLAT, fg="white", font = ("arial", 30, "bold"), activebackground = "#423838", 
-        activeforeground = "white", command = lambda x = str(contador): ingresar_numeros(x)).pack(side = tk.LEFT, fill = tk.BOTH, expand = True, padx = 20, pady = 11)
+        activeforeground = "white", command = lambda x = str(contador): cal.ingresar_numeros(x)).pack(side = tk.LEFT, fill = tk.BOTH, expand = True, padx = 20, pady = 11)
         contador += 1
         
     for index in range(2):
-        tk.Button(i, text = f"{lista_simbolos[contador_simbolos]}", bg = "#736E6E", relief = tk.FLAT, fg="white", font = ("arial", 40, "bold"), activebackground = "#423838", 
-        activeforeground = "white", command = lambda x = lista_simbolos[contador_simbolos]: comprobacion(x)).pack(side = tk.LEFT, fill = tk.BOTH, expand = True, padx = 20, pady = 11)
+        tk.Button(i, text = f"{cal.lista_simbolos[contador_simbolos]}", bg = "#736E6E", relief = tk.FLAT, fg="white", font = ("arial", 40, "bold"), activebackground = "#423838", 
+        activeforeground = "white", command = lambda x = cal.lista_simbolos[contador_simbolos]: cal.comprobacion(x)).pack(side = tk.LEFT, fill = tk.BOTH, expand = True, padx = 20, pady = 11)
         contador_simbolos += 1
         
 boton = tk.Button(app, text = f"0", bg = "#736E6E", fg="white", relief = tk.FLAT, font = ("arial", 30, "bold"), activebackground = "#423838", 
-        activeforeground = "white", height = 1, width = 3, command = lambda x = str(0): ingresar_numeros(x))
+        activeforeground = "white", height = 1, width = 3, command = lambda x = str(0): cal.ingresar_numeros(x))
 boton.pack(side = tk.LEFT, fill = tk.Y, expand = True, padx = 20, pady = 11)
 
 app.mainloop()
